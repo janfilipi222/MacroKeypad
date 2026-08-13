@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from domain.model.profile import Profile
+from domain.entities.profile import Profile
 
 class ProfileRepository(ABC):
 

@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 
@@ -9,17 +10,17 @@ from infrastructure.repositories.json_profile_repository import (
     JsonProfileRepository,
 )
 
-from application.use_cases.get_profiles import GetProfiles
+from application.use_cases.get_profiles_use_case import GetProfilesUseCase
 
 
 def main():
     app = QApplication(sys.argv)
 
     # Infrastructure
-    profile_repository = JsonProfileRepository()
+    profile_repository = JsonProfileRepository(Path("c:"))
 
     # Application
-    get_profiles = GetProfiles(profile_repository)
+    get_profiles = GetProfilesUseCase(profile_repository)
 
     # Presentation
     view_model = MainViewModel(

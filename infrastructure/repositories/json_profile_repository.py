@@ -1,10 +1,10 @@
-from infrastructure.persistence.profile_repository import ProfileRepository
-from domain.model.profile import Profile
-from domain.actions.macro_action import MacroAction
+from domain.repositories.profile_repository import ProfileRepository
+from domain.entities.profile import Profile
+from domain.entities.macro_action import MacroAction
 import json
 from pathlib import Path
 from dataclasses import asdict
-from domain.model.page import Page
+from domain.entities.page import Page
 
 class JsonProfileRepository(ProfileRepository):
     def __init__(self, file_path: Path):
