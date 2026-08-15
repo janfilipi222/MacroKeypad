@@ -1,22 +1,25 @@
 from PySide6.QtWidgets import QMainWindow
 
-from presentation.main_window.main_view_model import MainViewModel
+from presentation.device_screen.device_screen import DeviceScreen
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, view_model: MainViewModel):
-        super().__init__()
 
-        self.view_model = view_model
+    def __init__(self, device_vm, parent=None):
+        super().__init__(parent)
 
-        self._setup_ui()
-        self._connect_signals()
+        self.device_vm = device_vm
 
-    def _setup_ui(self):
-        pass
+        self.device_view = DeviceScreen(
+            self.device_vm,
+            self
+        )
 
-    def _connect_signals(self):
-        pass
+        self.setCentralWidget(self.device_view)
+
+        self.setWindowTitle("Macro Keypad")
+        self.resize(1200, 800)
 
 
 
+        
