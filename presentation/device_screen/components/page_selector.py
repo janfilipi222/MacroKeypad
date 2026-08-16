@@ -95,7 +95,7 @@ class ProfilePopup(QWidget):
 class PageSelector(QWidget):
     add_clicked = Signal()
     settings_clicked = Signal()
-    new_profile_selected = Signal(str)
+    new_page_selected = Signal(str)
 
     RECT_WIDTH = 250
 
@@ -170,4 +170,4 @@ class PageSelector(QWidget):
 
     def _select_profile(self, profile_name: str):
         self.profile_label.setText(str(profile_name))
-        self.new_profile_selected.emit(profile_name)
+        self.new_page_selected.emit(profile_name)

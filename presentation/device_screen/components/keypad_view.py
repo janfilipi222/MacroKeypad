@@ -206,6 +206,9 @@ class KeypadView(QWidget):
     def refresh_icons(self):
         icon_paths = self._device_vm.curr_icon_paths
 
+        self._set_active_button(0, 0)
+        self.icon_clicked.emit(0, 0)
+
         for row in range(self.ROWS):
             for col in range(self.COLS):
                 self._labels[row][col].set_icon(icon_paths[row][col])

@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+from PySide6.QtCore import QStandardPaths
+
 from PySide6.QtWidgets import QApplication
 
 from presentation.main_window.main_window import MainWindow
@@ -10,25 +12,30 @@ from infrastructure.repositories.json_profile_repository import (
     JsonProfileRepository,
 )
 
-from application.use_cases.get_profiles_use_case import GetProfilesUseCase
 
 
 def main():
     app = QApplication(sys.argv)
+    
+    app.setOrganizationName("CGM")
+    app.setApplicationName("MacroKeypadBackgroundApp")
 
-    # Infrastructure
-    profile_repository = JsonProfileRepository(Path("c:"))
+    
+    app_data = Path(QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation))
+    profile_path = app_data / "profiles"
 
-    # Application
-    get_profiles = GetProfilesUseCase(profile_repository)
+    profile_repository = JsonProfileRepository(profile_path)
 
-    # Presentation
     view_model = MainViewModel(
-        get_profiles=get_profiles,
+        repo=profile_repository,
+        app_data=app_data
     )
 
     main_window = MainWindow(view_model)
     main_window.show()
+
+
+
 
     sys.exit(app.exec())
 

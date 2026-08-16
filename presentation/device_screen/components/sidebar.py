@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtWidgets import (
     QWidget,
@@ -45,7 +48,6 @@ class ShortcutView(QWidget):
             }
         """)
 
-        # Přeposílání signálu při každé změně textu
         self.shortcut_input.textChanged.connect(self.shortcut_changed.emit)
 
         layout.addWidget(label)
@@ -53,7 +55,6 @@ class ShortcutView(QWidget):
         layout.addStretch()
 
     def set_shortcut(self, text: str):
-        """Metoda pro nastavení výchozí hodnoty zvenčí."""
         self.shortcut_input.setText(text)
 
 
@@ -217,30 +218,103 @@ class SystemView(QWidget):
                 button.setChecked(True)
                 break
 
+class EmptyView(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+
+class IconSelectorView(QWidget):
+    icon_path_changed = Signal(str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        label = QLabel("Icon Path:")
+        label.setWordWrap(True)
+        label.setStyleSheet("color: #ecf0f1; font-weight: bold;")
+
+        self.path_input = QLineEdit()
+        self.path_input.setPlaceholderText("Select icon path...")
+        self.path_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #34495e;
+                color: #ecf0f1;
+                border: 1px solid #5d6d7e;
+                border-radius: 4px;
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+            QLineEdit:focus {
+                border: 1px solid #3498db;
+            }
+        """)
+
+        browse_btn = QPushButton("Browse...")
+        browse_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        browse_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 6px 12px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #2980b9;
+            }
+        """)
+
+        self.path_input.textChanged.connect(self.icon_path_changed.emit)
+        browse_btn.clicked.connect(self._browse_file)
+
+        layout.addWidget(label)
+        layout.addWidget(self.path_input)
+        layout.addWidget(browse_btn)
+
+    def _browse_file(self):
+        local_appdata = os.environ.get("LOCALAPPDATA", "")
+        appdata = Path(local_appdata)
+        appdata = appdata / "CGM" / "MacroKeypadBackgroundApp" / "icons"
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Icon",
+            str(appdata),
+            "Image Files (*.png *.jpg *.jpeg *.ico *.svg);;All Files (*)",
+        )
+        if file_path:
+            self.path_input.setText(file_path)
+
+    def set_icon_path(self, path: str):
+        self.path_input.setText(path)
+
+
 class SideBar(QWidget):
     option_changed = Signal(int, str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        system_actions = {
+        system_actions = [
             "next slide",
             "prev slide",
             "calculator",
+        ]
 
-        }
-
-        self._options = [
+        self.options = [
             {"id": 0, "name": "Shortcut", "view": ShortcutView()},
             {"id": 1, "name": "Run Program", "view": ExecutablePathView()},
             {"id": 2, "name": "Run Script", "view": ScriptSelectorView()},
             {"id": 3, "name": "System Action", "view": SystemView(system_actions)},
+            {"id": 4, "name": "None", "view": EmptyView()},
         ]
-
-        self._options[0]["view"].shortcut_changed.connect(lambda x: print("shortcut: ", x))
-        self._options[1]["view"].path_changed.connect(lambda x: print("shortcut: ", x))
-        self._options[2]["view"].script_changed.connect(lambda x: print("shortcut: ", x))
-        self._options[3]["view"].selected_changed.connect(lambda x: print("shortcut: ", x))
 
         self.setFixedWidth(260)
         self.setStyleSheet("""
@@ -274,43 +348,111 @@ class SideBar(QWidget):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(12)
 
+        # 1. Icon Selector (Uplne nahore nad ostatnimi)
+        self.icon_selector = IconSelectorView(self)
+        self.icon_selector.icon_path_changed.connect(
+            lambda x: print("icon path: ", x)
+        )
+        main_layout.addWidget(self.icon_selector)
+
+        # 2. Options GroupBox
         radio_box = QGroupBox("Options")
         radio_layout = QVBoxLayout(radio_box)
         radio_layout.setSpacing(6)
 
         self._button_group = QButtonGroup(self)
 
-        for option in self._options:
+        for option in self.options:
             radio_btn = QRadioButton(option["name"])
             radio_layout.addWidget(radio_btn)
-
             self._button_group.addButton(radio_btn, option["id"])
 
         main_layout.addWidget(radio_box)
 
+        # 3. Detail Settings GroupBox
         settings_box = QGroupBox("Detail Settings")
         settings_layout = QVBoxLayout(settings_box)
 
         self._stacked_widget = QStackedWidget()
 
-        for option in self._options:
+        for option in self.options:
             self._stacked_widget.addWidget(option["view"])
 
         settings_layout.addWidget(self._stacked_widget)
         main_layout.addWidget(settings_box)
 
+        main_layout.addStretch()
+
+
+        self.options[0]["view"].shortcut_changed.connect(
+            lambda x: print("shortcut: ", x)
+        )
+        self.options[1]["view"].path_changed.connect(
+            lambda x: print("exe path: ", x)
+        )
+        self.options[2]["view"].script_changed.connect(
+            lambda x: print("script: ", x)
+        )
+        self.options[3]["view"].selected_changed.connect(
+            lambda x: print("system action: ", x)
+        )
+
         self._button_group.idClicked.connect(self._on_radio_selected)
 
-        if self._options:
+        if self.options:
             first_btn = self._button_group.button(0)
             if first_btn:
                 first_btn.setChecked(True)
                 self._on_radio_selected(0)
 
+
+    def set_data(self, data: dict):
+
+        if not data or "action" not in data:
+            action_name = "none"
+
+        if "icon" in data and data["icon"]:
+            self.icon_selector.set_icon_path(data["icon"])
+
+        params: dict = data.get("params", {})
+        action_name = str(data["action"]).lower()
+
+        if "keybind" in action_name or "shortcut" in action_name:
+            target_id = 0
+            val = params.get("keys", params.get("shortcut", ""))
+            self.options[0]["view"].set_shortcut(val)
+
+        elif "program" in action_name or "executable" in action_name:
+            target_id = 1
+            val = params.get("path", params.get("executable", ""))
+            self.options[1]["view"].set_path(val)
+
+        elif "script" in action_name:
+            target_id = 2
+            val = params.get("name", params.get("code", ""))
+            self.options[2]["view"].set_script(val)
+
+        elif "system" in action_name:
+            target_id = 3
+            val = params.get("action", params.get("name", params.get("selected", "")))
+            self.options[3]["view"].set_selected(val)
+            
+        elif "none" in action_name:
+            target_id = 4
+
+
+        else:
+            return
+
+        btn = self._button_group.button(target_id)
+        if btn:
+            btn.setChecked(True)
+            self._on_radio_selected(target_id)
+
     def _on_radio_selected(self, option_id: int):
         self._stacked_widget.setCurrentIndex(option_id)
 
         selected_name = next(
-            (opt["name"] for opt in self._options if opt["id"] == option_id), ""
+            (opt["name"] for opt in self.options if opt["id"] == option_id), ""
         )
         self.option_changed.emit(option_id, selected_name)
