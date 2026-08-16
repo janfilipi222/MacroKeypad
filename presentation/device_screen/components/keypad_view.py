@@ -204,8 +204,7 @@ class KeypadView(QWidget):
                 self._labels[r][c].set_active_state(is_active)
 
     def refresh_icons(self):
-        icon_paths = self._device_vm.curr_icon_paths
-
+        icon_paths = self._device_vm.get_curr_icon_paths()
         self._set_active_button(0, 0)
         self.icon_clicked.emit(0, 0)
 

@@ -45,7 +45,6 @@ class MainViewModel(QObject):
 
     def select_new_action(self, id: int):
         action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]
-        print(action)
         if action == None:
             if id == 4:
                 return
@@ -58,7 +57,6 @@ class MainViewModel(QObject):
             case 3: action.type = "system"
             case 4: action = None
 
-        print(action)
         self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]] = action
 
     def select_new_params(self, param: str):
@@ -73,6 +71,11 @@ class MainViewModel(QObject):
             case "script": action.params["name"] = param
             case "system": action.params["action"] = param
 
+    def select_new_icon_path(self, path):
+        action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]
+        if action == None:
+            return
+        action.icon = path
 
 
     def select_new_profile(self, profile: str):
@@ -95,7 +98,11 @@ class MainViewModel(QObject):
         self.curr_icon = [row, col]
         self.curr_action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]
 
+    def get_curr_icon_paths(self):
+        self.curr_icon_paths = self._set_curr_icon_paths()
+        return self.curr_icon_paths
 
+   
     def _set_curr_icon_paths(self):
         icon_path = self._app_data / "icons" / self.curr_profile.id
         paths = []
@@ -107,7 +114,10 @@ class MainViewModel(QObject):
                 else:
                     r.append(icon_path / action.icon)
             paths.append(r)
+
+        print("paths: ", paths)
         return paths
+
 
 
     def get_all_profiles(self) -> list[str]:

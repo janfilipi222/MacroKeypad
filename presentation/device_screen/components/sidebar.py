@@ -293,6 +293,8 @@ class IconSelectorView(QWidget):
             self.path_input.setText(file_path)
 
     def set_icon_path(self, path: str):
+        if path == None:
+            path = ""
         self.path_input.setText(path)
 
 
@@ -392,7 +394,7 @@ class SideBar(QWidget):
         if not data or "action" not in data:
             action_name = "none"
 
-        if "icon" in data and data["icon"]:
+        if "icon" in data:
             self.icon_selector.set_icon_path(data["icon"])
 
         params: dict = data.get("params", {})

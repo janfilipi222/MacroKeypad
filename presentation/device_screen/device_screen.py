@@ -93,12 +93,16 @@ class DeviceScreen(QWidget):
             }
         """)
         
-        self.save_btn.clicked.connect(self._vm.save_curr)
+        self.save_btn.clicked.connect(self._handle_save_btn)
 
         top_layout.addWidget(
             self.save_btn, 0,
             Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop
         )
+
+    def _handle_save_btn(self):
+        self._vm.save_curr()
+        self.keypad_view.refresh_icons()
 
 
     def _handle_new_profile_selected(self, profile):
@@ -169,6 +173,6 @@ class DeviceScreen(QWidget):
             self._vm.select_new_action
         )
 
-        # self.sidebar.icon_selector.icon_path_changed.connect(
-        #     self._vm.select_new_icon
-        # )
+        self.sidebar.icon_selector.icon_path_changed.connect(
+            self._vm.select_new_icon_path
+        )
