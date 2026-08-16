@@ -38,6 +38,43 @@ class MainViewModel(QObject):
         self.system_icons = self._assets_path
 
 
+    def save_curr(self):
+        print("saving")
+        self._repo.save_profile(self.curr_profile)
+
+
+    def select_new_action(self, id: int):
+        action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]
+        print(action)
+        if action == None:
+            if id == 4:
+                return
+            action = MacroAction(None, None, {})
+
+        match id:
+            case 0: action.type = "keybind"
+            case 1: action.type = "program"
+            case 2: action.type = "script"
+            case 3: action.type = "system"
+            case 4: action = None
+
+        print(action)
+        self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]] = action
+
+    def select_new_params(self, param: str):
+        action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]
+        if action == None:
+            return
+
+        type = action.type
+        match type:
+            case "keybind": action.params["keys"] = param
+            case "program": action.params["path"] = param
+            case "script": action.params["name"] = param
+            case "system": action.params["action"] = param
+
+
+
     def select_new_profile(self, profile: str):
         id = next((d["id"] for d in self._all_profiles if d["name"] == profile))
         self.curr_profile = self._repo.load_profile(id)
@@ -82,6 +119,16 @@ class MainViewModel(QObject):
     def get_all_pages(self):
 
         return [p.name for p in self.curr_profile.pages]
+
+
+    def get_page_list_id_by_id(self, page_id: str) -> int | None:
+        if not self.curr_profile:
+            return None
+        for i, page in enumerate(self.curr_profile.pages):
+            if page.id == page_id:
+                return i
+        return None
+
 
 
     def get_page_by_id(self, page_id: str) -> Page | None:

@@ -348,14 +348,9 @@ class SideBar(QWidget):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(12)
 
-        # 1. Icon Selector (Uplne nahore nad ostatnimi)
         self.icon_selector = IconSelectorView(self)
-        self.icon_selector.icon_path_changed.connect(
-            lambda x: print("icon path: ", x)
-        )
         main_layout.addWidget(self.icon_selector)
 
-        # 2. Options GroupBox
         radio_box = QGroupBox("Options")
         radio_layout = QVBoxLayout(radio_box)
         radio_layout.setSpacing(6)
@@ -369,7 +364,6 @@ class SideBar(QWidget):
 
         main_layout.addWidget(radio_box)
 
-        # 3. Detail Settings GroupBox
         settings_box = QGroupBox("Detail Settings")
         settings_layout = QVBoxLayout(settings_box)
 
@@ -383,19 +377,6 @@ class SideBar(QWidget):
 
         main_layout.addStretch()
 
-
-        self.options[0]["view"].shortcut_changed.connect(
-            lambda x: print("shortcut: ", x)
-        )
-        self.options[1]["view"].path_changed.connect(
-            lambda x: print("exe path: ", x)
-        )
-        self.options[2]["view"].script_changed.connect(
-            lambda x: print("script: ", x)
-        )
-        self.options[3]["view"].selected_changed.connect(
-            lambda x: print("system action: ", x)
-        )
 
         self._button_group.idClicked.connect(self._on_radio_selected)
 
