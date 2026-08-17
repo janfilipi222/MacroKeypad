@@ -74,12 +74,13 @@ class DeviceScreen(QWidget):
 
     def _setup_save(self, top_layout):
         self.save_btn = QPushButton("Save")
+        self.save_btn.setFixedHeight(40)
         self.save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.save_btn.setStyleSheet("""
             QPushButton {
-                background-color: #27ae60;
+                background-color: #3498db;
                 color: #ffffff;
-                font-weight: bold;
+                font-weight: normal;
                 border: none;
                 border-radius: 4px;
                 padding: 6px 16px;
@@ -92,7 +93,7 @@ class DeviceScreen(QWidget):
                 background-color: #1e8449;
             }
         """)
-        
+
         self.save_btn.clicked.connect(self._handle_save_btn)
 
         top_layout.addWidget(

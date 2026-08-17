@@ -19,7 +19,15 @@ class ClickableLabel(QLabel):
         self.setFixedSize(40, 40)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setStyleSheet("background-color: #3498db; border-radius: 4px;")
+        self.setStyleSheet("""
+            QLabel {
+                background-color: #505050;
+                border-radius: 4px;
+            }
+            QLabel:hover {
+                background-color: #454545;
+            }
+        """)
 
         pixmap = QPixmap(str(icon_path))
         if not pixmap.isNull():
@@ -51,7 +59,7 @@ class ProfilePopup(QWidget):
         container = QWidget(self)
         container.setStyleSheet("""
             QWidget {
-                background-color: #2ecc71;
+                background-color: #63a8d6;
                 border-radius: 4px;
             }
         """)
@@ -115,7 +123,7 @@ class PageSelector(QWidget):
         # Prostřední obdélník
         self.rect = QWidget()
         self.rect.setFixedSize(self.RECT_WIDTH, 40)
-        self.rect.setStyleSheet("background-color: #2ecc71; border-radius: 4px;")
+        self.rect.setStyleSheet("background-color: #3498db; border-radius: 4px;")
         self.rect.setCursor(Qt.CursorShape.PointingHandCursor)
 
         rect_layout = QHBoxLayout(self.rect)
