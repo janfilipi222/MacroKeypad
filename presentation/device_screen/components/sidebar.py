@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtCore import Signal, Qt, QEvent
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -60,33 +60,23 @@ class ShortcutView(QWidget):
 
 class ExecutablePathView(QWidget):
     path_changed = Signal(str)
+    params_changed = Signal(list)
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(8)
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(8)
 
+        # 1. Cesta k executable
         label = QLabel("Select executable file path (.exe) to run:")
         label.setWordWrap(True)
         label.setStyleSheet("color: #ecf0f1; font-weight: bold;")
 
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Select executable (.exe)...")
-        self.path_input.setStyleSheet("""
-            QLineEdit {
-                background-color: #34495e;
-                color: #ecf0f1;
-                border: 1px solid #5d6d7e;
-                border-radius: 4px;
-                padding: 6px 10px;
-                font-size: 13px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #3498db;
-            }
-        """)
+        self.path_input.setStyleSheet(self._line_edit_style())
 
         browse_btn = QPushButton("Browse...")
         browse_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -107,10 +97,81 @@ class ExecutablePathView(QWidget):
         self.path_input.textChanged.connect(self.path_changed.emit)
         browse_btn.clicked.connect(self._browse_file)
 
-        layout.addWidget(label)
-        layout.addWidget(self.path_input)
-        layout.addWidget(browse_btn)
-        layout.addStretch()
+        self.layout.addWidget(label)
+        self.layout.addWidget(self.path_input)
+        self.layout.addWidget(browse_btn)
+
+        # 2. Parametry / Argumenty
+        params_label = QLabel("Arguments / Parameters:")
+        params_label.setStyleSheet("color: #ecf0f1; font-weight: bold; margin-top: 6px;")
+        self.layout.addWidget(params_label)
+
+        # Seznam pro uložení všech dynamických QLineEdit pro parametry
+        self.param_inputs: list[QLineEdit] = []
+
+        # Přidáme výchozí první pole pro parametry
+        self._add_param_input()
+
+        self.layout.addStretch()
+
+    def _line_edit_style(self) -> str:
+        return """
+            QLineEdit {
+                background-color: #34495e;
+                color: #ecf0f1;
+                border: 1px solid #5d6d7e;
+                border-radius: 4px;
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+            QLineEdit:focus {
+                border: 1px solid #3498db;
+            }
+        """
+
+    def _add_param_input(self, text: str = "") -> QLineEdit:
+        line_edit = QLineEdit()
+        line_edit.setPlaceholderText("Enter argument...")
+        line_edit.setStyleSheet(self._line_edit_style())
+        if text:
+            line_edit.setText(text)
+
+        # Sledování zmen textu
+        line_edit.textChanged.connect(self._on_param_text_changed)
+
+        # Odchytávání události ztráty fokusu (focus out)
+        line_edit.installEventFilter(self)
+
+        self.param_inputs.append(line_edit)
+
+        # Vložíme nový LineEdit těsně před Stretch na konci layoutu
+        self.layout.insertWidget(self.layout.count() - 1, line_edit)
+        return line_edit
+
+    def _on_param_text_changed(self):
+        sender: QLineEdit = self.sender()
+
+        # Pokud uživatel začal psát do posledního pole, automaticky vytvoříme nové
+        if sender == self.param_inputs[-1] and sender.text().strip() != "":
+            self._add_param_input()
+
+        self._emit_params()
+
+    def eventFilter(self, obj, event):
+        # Detekce ztráty fokusu u polí s parametry
+        if event.type() == QEvent.Type.FocusOut and obj in self.param_inputs:
+            # Smaže pole pouze pokud je prázdné a NENÍ to jediné/poslední pole
+            if obj.text().strip() == "" and len(self.param_inputs) > 1 and obj != self.param_inputs[-1]:
+                self.param_inputs.remove(obj)
+                obj.deleteLater()
+                self._emit_params()
+
+        return super().eventFilter(obj, event)
+
+    def _emit_params(self):
+        # Vrátí text ze všech polí (ignoruje prázdná pole)
+        params_list = [line.text() for line in self.param_inputs if line.text().strip() != ""]
+        self.params_changed.emit(params_list)
 
     def _browse_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -125,6 +186,20 @@ class ExecutablePathView(QWidget):
     def set_path(self, path: str):
         self.path_input.setText(path)
 
+    def set_params(self, params: list[str]):
+        # Vyčištění stávajících vstupů
+        for line_edit in self.param_inputs:
+            line_edit.deleteLater()
+        self.param_inputs.clear()
+
+        # Přidání polí s hodnotami
+        for param in params:
+            if param.strip() != "":
+                self._add_param_input(param)
+
+        # Vždy přidáme jedno prázdné pole na konec pro další zápis
+        self._add_param_input()
+        self._emit_params()
 
 class ScriptSelectorView(QWidget):
     script_changed = Signal(str)

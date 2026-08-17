@@ -36,7 +36,7 @@ class IconLabel(QLabel):
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setStyleSheet("""
             QLabel {
-                background-color: #303030;
+                background-color: #505050;
                 border-radius: 10px;
             }
         """)
@@ -137,7 +137,7 @@ class KeypadView(QWidget):
 
         self.setStyleSheet("""
             KeypadView {
-                background-color: #101010;
+                background-color: #303030;
                 border-radius: 12px;
             }
         """)

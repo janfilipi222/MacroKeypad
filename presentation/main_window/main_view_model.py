@@ -115,7 +115,6 @@ class MainViewModel(QObject):
                     r.append(icon_path / action.icon)
             paths.append(r)
 
-        print("paths: ", paths)
         return paths
 
 
