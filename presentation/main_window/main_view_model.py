@@ -71,6 +71,14 @@ class MainViewModel(QObject):
             case "script": action.params["name"] = param
             case "system": action.params["action"] = param
 
+    def select_new_args(self, args: list[str]):
+        action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]
+        if action == None:
+            return
+
+        if action.type == "program":
+            action.params["args"] = args
+
     def select_new_icon_path(self, path):
         action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]
         if action == None:

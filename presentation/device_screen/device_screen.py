@@ -163,6 +163,9 @@ class DeviceScreen(QWidget):
         self.sidebar.options[1]["view"].path_changed.connect(
             self._vm.select_new_params
         )
+        self.sidebar.options[1]["view"].params_changed.connect(
+            self._vm.select_new_args
+        )
         self.sidebar.options[2]["view"].script_changed.connect(
             self._vm.select_new_params
         )

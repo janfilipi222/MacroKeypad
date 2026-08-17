@@ -215,28 +215,34 @@ class ScriptSelectorView(QWidget):
         label.setWordWrap(True)
         label.setStyleSheet("color: #ecf0f1; font-weight: bold;")
 
-        self.script_input = QTextEdit()
+        self.script_input = QLineEdit()
         self.script_input.setPlaceholderText("Write your script here...")
         self.script_input.setStyleSheet("""
-            QTextEdit {
+            QLineEdit {
                 background-color: #34495e;
                 color: #ecf0f1;
                 border: 1px solid #5d6d7e;
                 border-radius: 4px;
-                padding: 6px;
+                padding: 6px 10px;
                 font-family: Consolas, Monaco, monospace;
                 font-size: 13px;
             }
-            QTextEdit:focus {
+            QLineEdit:focus {
                 border: 1px solid #3498db;
             }
         """)
 
         # Vysílání signálu při každé úpravě textu
-        self.script_input.textChanged.connect(self._on_text_changed)
+        self.script_input.textChanged.connect(self.script_changed.emit)
 
         layout.addWidget(label)
         layout.addWidget(self.script_input)
+        layout.addStretch()
+
+    def set_script(self, text: str):
+        self.script_input.blockSignals(True)
+        self.script_input.setText(text)
+        self.script_input.blockSignals(False)
 
     def _on_text_changed(self):
         self.script_changed.emit(self.script_input.toPlainText())
@@ -465,15 +471,14 @@ class SideBar(QWidget):
 
 
     def set_data(self, data: dict):
-
         if not data or "action" not in data:
-            action_name = "none"
+            data = {"action": "none"}
 
         if "icon" in data:
             self.icon_selector.set_icon_path(data["icon"])
 
         params: dict = data.get("params", {})
-        action_name = str(data["action"]).lower()
+        action_name = str(data.get("action", "none")).lower()
 
         if "keybind" in action_name or "shortcut" in action_name:
             target_id = 0
@@ -482,8 +487,11 @@ class SideBar(QWidget):
 
         elif "program" in action_name or "executable" in action_name:
             target_id = 1
-            val = params.get("path", params.get("executable", ""))
-            self.options[1]["view"].set_path(val)
+            path = params.get("path", params.get("executable", ""))
+            args = params.get("args", [])
+            
+            self.options[1]["view"].set_path(path)
+            self.options[1]["view"].set_params(args)
 
         elif "script" in action_name:
             target_id = 2
@@ -494,10 +502,9 @@ class SideBar(QWidget):
             target_id = 3
             val = params.get("action", params.get("name", params.get("selected", "")))
             self.options[3]["view"].set_selected(val)
-            
+
         elif "none" in action_name:
             target_id = 4
-
 
         else:
             return
