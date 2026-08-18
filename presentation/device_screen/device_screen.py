@@ -5,6 +5,10 @@ from presentation.device_screen.components.keypad_view import KeypadView
 from presentation.device_screen.components.profile_selector import ProfileSelector
 from presentation.device_screen.components.page_selector import PageSelector
 from presentation.device_screen.components.sidebar import SideBar
+from presentation.device_screen.components.add_profile_popup import AddProfilePopup
+from presentation.device_screen.components.add_page_popup import AddPagePopup
+from presentation.device_screen.components.profile_settings_popup import ProfileSettingsPopup
+from presentation.device_screen.components.page_settings_profile import PageSettingsPopup
 
 from presentation.main_window.main_view_model import MainViewModel
 
@@ -55,6 +59,8 @@ class DeviceScreen(QWidget):
             Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop,
         )
         self.profile_selector.new_profile_selected.connect(self._handle_new_profile_selected)
+        self.profile_selector.add_clicked.connect(self._show_add_profile_popup)
+        self.profile_selector.settings_clicked.connect(self._show_profile_settings_popup)
 
         self._setup_save(top_layout)
 
@@ -64,13 +70,28 @@ class DeviceScreen(QWidget):
             Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop,
         )
         self.page_selector.new_page_selected.connect(self._handle_new_page_selected)
+        self.page_selector.add_clicked.connect(self._show_add_page_popup)
+        self.page_selector.settings_clicked.connect(self._show_page_settings_popup)
 
+    def _show_add_profile_popup(self):
+        popup = AddProfilePopup(self)
+        popup.exec()
 
-        self.profile_selector.add_clicked.connect(lambda: print("add clicked"))
-        self.profile_selector.settings_clicked.connect(
-            lambda: print("settings clicked")
-        )
+    def _show_profile_settings_popup(self):
+        popup = ProfileSettingsPopup(self)
+        if hasattr(self._vm, "curr_profile"):
+            popup.set_data(self._vm.curr_profile)
+        popup.exec()
 
+    def _show_add_page_popup(self):
+        popup = AddPagePopup(self)
+        popup.exec()
+
+    def _show_page_settings_popup(self):
+        popup = PageSettingsPopup(self)
+        if hasattr(self._vm, "curr_page"):
+            popup.set_data(self._vm.curr_page)
+        popup.exec()
 
     def _setup_save(self, top_layout):
         self.save_btn = QPushButton("Save")
