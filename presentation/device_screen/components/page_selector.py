@@ -170,12 +170,12 @@ class PageSelector(QWidget):
             self.popup = ProfilePopup(
                 profiles=profiles, width=self.RECT_WIDTH, parent=self
             )
-            self.popup.profile_selected.connect(self._select_profile)
+            self.popup.profile_selected.connect(self.select_page)
 
             global_pos = self.rect.mapToGlobal(self.rect.rect().bottomLeft())
             self.popup.move(global_pos)
             self.popup.show()
 
-    def _select_profile(self, profile_name: str):
+    def select_page(self, profile_name: str):
         self.profile_label.setText(str(profile_name))
         self.new_page_selected.emit(profile_name)

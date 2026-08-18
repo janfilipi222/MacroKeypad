@@ -38,6 +38,56 @@ class MainViewModel(QObject):
         self.system_icons = self._assets_path
 
 
+    def add_new_profile(self, profile: dict):
+        # print("add new profile: ", profile)
+        app = profile["path"] if profile["path"] != "" else None
+        new_profile = Profile(
+            profile["id"],
+            profile["name"],
+            app,
+            [Page(
+                "default",
+                "Default Page",
+                [[None] * 4 for _ in range(6)]
+            )]
+        )
+        self._repo.save_profile(new_profile)
+
+    def edit_curr_profile(self, profile: dict):
+        print("edited profile: ", profile)
+        self.curr_profile.name = profile["name"] or None
+        self.curr_profile.id = profile["id"] or None
+        self.curr_profile.application = profile["path"] or None
+        self.save_curr()
+
+    def delete_profile(self, id: str):
+        # print("delete profile: ", id)
+        self._repo.delete_profile(id)
+
+
+    def add_new_page(self, page: dict):
+        print("add new profile: ", page)
+        new_page = Page(
+                page["id"],
+                page["name"],
+                [[None] * 4 for _ in range(6)]
+            )
+        self.curr_profile.pages.append(new_page)
+        self.save_curr()
+
+    def edit_curr_page(self, page: dict):
+        print("edited page: ", page)
+        self.curr_page.id = page["name"] or None
+        self.curr_page.name = page["id"] or None
+        self.save_curr()
+
+    def delete_page(self, id: str):
+        print("delete page: ", id)
+        list_id = self.get_page_list_id_by_id(id)
+        self.curr_profile.pages.pop(list_id)
+        self.save_curr()
+
+
     def save_curr(self):
         print("saving")
         self._repo.save_profile(self.curr_profile)
@@ -87,6 +137,7 @@ class MainViewModel(QObject):
 
 
     def select_new_profile(self, profile: str):
+        self.get_all_profiles()
         id = next((d["id"] for d in self._all_profiles if d["name"] == profile))
         self.curr_profile = self._repo.load_profile(id)
         self.curr_page_id = "default"

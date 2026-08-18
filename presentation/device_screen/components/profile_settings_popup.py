@@ -76,25 +76,6 @@ class ProfileSettingsPopup(QDialog):
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Select executable (.exe)...")
 
-        # Browse button
-        self.browse_btn = QPushButton("Browse...")
-        self.browse_btn.setFixedHeight(32)
-        self.browse_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #505050;
-                color: #ffffff;
-                border: none;
-                border-radius: 4px;
-                padding: 6px 12px;
-                font-size: 13px;
-            }
-            QPushButton:hover {
-                background-color: rgba(0, 0, 0, 0.1);
-            }
-        """)
-        self.browse_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.browse_btn.clicked.connect(self._browse_path)
-
         self.name_input.textChanged.connect(self._on_name_changed)
         self.id_input.installEventFilter(self)
 
@@ -104,7 +85,6 @@ class ProfileSettingsPopup(QDialog):
         layout.addWidget(self.id_input)
         layout.addWidget(path_label)
         layout.addWidget(self.path_input)
-        layout.addWidget(self.browse_btn)
 
         # Spodní tlačítka
         buttons_layout = QHBoxLayout()
@@ -201,15 +181,6 @@ class ProfileSettingsPopup(QDialog):
         filtered_words = [w for w in words if w and w not in ignored_words]
         self.id_input.setText("_".join(filtered_words))
 
-    def _browse_path(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Select Executable",
-            "C:\\",
-            "Executable Files (*.exe);;All Files (*)",
-        )
-        if file_path:
-            self.path_input.setText(file_path)
 
     def _handle_save(self):
         data = {

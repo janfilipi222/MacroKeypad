@@ -73,25 +73,51 @@ class DeviceScreen(QWidget):
         self.page_selector.add_clicked.connect(self._show_add_page_popup)
         self.page_selector.settings_clicked.connect(self._show_page_settings_popup)
 
+
+        
     def _show_add_profile_popup(self):
         popup = AddProfilePopup(self)
+        popup.add_profile.connect(self._handle_add_profile)
         popup.exec()
 
     def _show_profile_settings_popup(self):
         popup = ProfileSettingsPopup(self)
         if hasattr(self._vm, "curr_profile"):
             popup.set_data(self._vm.curr_profile)
+        popup.save_profile.connect(self._vm.edit_curr_profile)
+        popup.delete_profile.connect(self._handle_delete_profile)
         popup.exec()
 
     def _show_add_page_popup(self):
         popup = AddPagePopup(self)
+        popup.add_page.connect(self._handle_add_page)
         popup.exec()
 
     def _show_page_settings_popup(self):
         popup = PageSettingsPopup(self)
         if hasattr(self._vm, "curr_page"):
             popup.set_data(self._vm.curr_page)
+        popup.save_page.connect(self._vm.edit_curr_page)
+        popup.delete_page.connect(self._handle_delete_page)
         popup.exec()
+
+
+    def _handle_add_profile(self, profile: dict):
+        self._vm.add_new_profile(profile)
+        self.profile_selector.select_profile(profile["name"])
+
+    def _handle_delete_profile(self, profile_id: str):
+        self._vm.delete_profile(profile_id)
+        self.profile_selector.select_profile(self._vm.get_all_profiles()[0])
+
+    def _handle_add_page(self, page: dict):
+        self._vm.add_new_page(page)
+        self.page_selector.select_page(self._vm.curr_profile.pages[-1].name)
+
+    def _handle_delete_page(self, page_id):
+        self._vm.delete_page(page_id)
+        self.page_selector.select_page(self._vm.curr_profile.pages[0].name)
+        
 
     def _setup_save(self, top_layout):
         self.save_btn = QPushButton("Save")
