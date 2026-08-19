@@ -9,35 +9,45 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QPushButton,
 )
+from pathlib import Path
+from PySide6.QtCore import Signal, Qt, QSize, QRect
+from PySide6.QtGui import QIcon, QPainter
+from PySide6.QtWidgets import QWidget, QStyleOption, QStyle
 
-
-class ClickableLabel(QLabel):
+class ClickableLabel(QWidget):
     clicked = Signal()
 
     def __init__(self, icon_path: str | Path, parent=None):
         super().__init__(parent)
         self.setFixedSize(40, 40)
-        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self._icon = QIcon(str(icon_path))
+        self._icon_size = QSize(20, 20)
+
         self.setStyleSheet("""
-            QLabel {
+            ClickableLabel {
                 background-color: #505050;
                 border-radius: 4px;
             }
-            QLabel:hover {
+            ClickableLabel:hover {
                 background-color: #454545;
             }
         """)
 
-        pixmap = QPixmap(str(icon_path))
-        if not pixmap.isNull():
-            pixmap = pixmap.scaled(
-                20,
-                20,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation,
-            )
-            self.setPixmap(pixmap)
+    def paintEvent(self, event):
+        # Nutné pro podporu QSS stylopisu na vlastní třídě dědící z QWidget
+        opt = QStyleOption()
+        opt.initFrom(self)
+        painter = QPainter(self)
+        self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
+
+        # Vykreslení QIcon uprostřed widgetu
+        if not self._icon.isNull():
+            x = (self.width() - self._icon_size.width()) // 2
+            y = (self.height() - self._icon_size.height()) // 2
+            rect = QRect(x, y, self._icon_size.width(), self._icon_size.height())
+            self._icon.paint(painter, rect, Qt.AlignmentFlag.AlignCenter)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:

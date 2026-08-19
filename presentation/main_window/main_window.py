@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.device_view)
 
         self.setWindowTitle("Macro Keypad")
-        self.resize(1200, 800)
+        self.resize(1200, 700)
 
 
 
