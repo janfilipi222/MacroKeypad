@@ -1,0 +1,5 @@
+pyinstaller --noconfirm --onefile --windowed --name "CGM Config" --icon "assets/icon.png" --add-data "assets;assets" main.py
+
+pyinstaller --noconfirm --onefile --windowed --name "CGM Config" --icon "assets/icon.png" --add-data "assets/icon.png;assets" --add-data "assets/add.png;assets" --add-data "assets/arrow_down.png;assets" --add-data "assets/settings.png;assets" main.py
+
+pyinstaller --noconfirm --onefile --windowed --name "CGM Config" --icon "assets/icon.png" --add-data "assets;assets" main.py
