@@ -96,7 +96,7 @@ class MainViewModel(QObject):
     def select_new_action(self, id: int):
         action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]
         if action == None:
-            if id == 4:
+            if id == 5:
                 return
             action = MacroAction(None, None, {})
 
@@ -105,7 +105,8 @@ class MainViewModel(QObject):
             case 1: action.type = "program"
             case 2: action.type = "script"
             case 3: action.type = "system"
-            case 4: action = None
+            case 4: action.type = "ipc"
+            case 5: action = None
 
         self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]] = action
 
@@ -114,12 +115,15 @@ class MainViewModel(QObject):
         if action == None:
             return
 
+        print("select new param", param)
+
         type = action.type
         match type:
             case "keybind": action.params["keys"] = param
             case "program": action.params["path"] = param
             case "script": action.params["name"] = param
             case "system": action.params["action"] = param
+            case "ipc": action.params["action"] = param
 
     def select_new_args(self, args: list[str]):
         action = self.curr_page.actions[self.curr_icon[0]][self.curr_icon[1]]

@@ -36,13 +36,11 @@ class ClickableLabel(QWidget):
         """)
 
     def paintEvent(self, event):
-        # Nutné pro podporu QSS stylopisu na vlastní třídě dědící z QWidget
         opt = QStyleOption()
         opt.initFrom(self)
         painter = QPainter(self)
         self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
 
-        # Vykreslení QIcon uprostřed widgetu
         if not self._icon.isNull():
             x = (self.width() - self._icon_size.width()) // 2
             y = (self.height() - self._icon_size.height()) // 2

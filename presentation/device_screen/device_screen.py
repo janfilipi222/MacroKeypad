@@ -219,6 +219,9 @@ class DeviceScreen(QWidget):
         self.sidebar.options[3]["view"].selected_changed.connect(
             self._vm.select_new_params
         )
+        self.sidebar.options[4]["view"].action_changed.connect(
+            self._vm.select_new_params
+        )
 
         self.sidebar._button_group.idClicked.connect(
             self._vm.select_new_action

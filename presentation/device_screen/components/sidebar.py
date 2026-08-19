@@ -305,6 +305,43 @@ class EmptyView(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
+class IpcActionView(QWidget):
+    action_changed = Signal(str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        label = QLabel("IPC Action")
+        label.setStyleSheet("color: #ecf0f1; font-weight: bold;")
+
+        self.command_input = QLineEdit()
+        self.command_input.setPlaceholderText("Write an IPC action...")
+        self.command_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #34495e;
+                color: #ecf0f1;
+                border: 1px solid #5d6d7e;
+                border-radius: 4px;
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+            QLineEdit:focus {
+                border: 1px solid #3498db;
+            }
+        """)
+
+        self.command_input.textChanged.connect(self.action_changed.emit)
+
+        layout.addWidget(label)
+        layout.addWidget(self.command_input)
+        layout.addStretch()
+
+    def set_action(self, text: str):
+        self.command_input.setText(text)
 
 class IconSelectorView(QWidget):
     icon_path_changed = Signal(str)
@@ -396,9 +433,11 @@ class SideBar(QWidget):
             {"id": 1, "name": "Run Program", "view": ExecutablePathView()},
             {"id": 2, "name": "Run Script", "view": ScriptSelectorView()},
             {"id": 3, "name": "System Action", "view": SystemView(system_actions)},
-            {"id": 4, "name": "None", "view": EmptyView()},
+            {"id": 4, "name": "IPC Action", "view": IpcActionView()},
+            {"id": 5, "name": "None", "view": EmptyView()},
         ]
 
+        
         self.setFixedWidth(260)
         self.setStyleSheet("""
             SideBar {
@@ -503,8 +542,14 @@ class SideBar(QWidget):
             val = params.get("action", params.get("name", params.get("selected", "")))
             self.options[3]["view"].set_selected(val)
 
-        elif "none" in action_name:
+        elif "ipc" in action_name:
             target_id = 4
+            val = params.get("action", params.get("command", ""))
+            self.options[4]["view"].set_action(val)
+
+
+        elif "none" in action_name:
+            target_id = 5
 
         else:
             return
